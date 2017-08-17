@@ -239,7 +239,7 @@ def place_suggest(client, query, region, **kwargs):
     return client.get(kwargs)
 
 
-def geocode(client, address=None, location=None, **kwargs):
+def geocode(client, address=None, location=None, locations=None, **kwargs):
     """This module sends requests for "address", and returns "location"
         information, or conversely. For more details, please refer to Baidu's
         official description.
@@ -254,8 +254,8 @@ def geocode(client, address=None, location=None, **kwargs):
 
     sep_pattern = re.compile(r'[,;|]')
 
-    if not any([address, location]):
-        raise ValueError('please assign either "address" or "location".')
+    if not any([address, location, locations]):
+        raise ValueError('please assign either "address" or "location" or "locations".')
 
     elif location:
         if isinstance(location, str):
@@ -275,6 +275,30 @@ def geocode(client, address=None, location=None, **kwargs):
 
         else:
             raise ValueError('"location" must be a str or list instance!')
+    elif locations:
+        if isinstance(locations, list):
+            formatted_locations = []
+            for location in locations:
+                if isinstance(location, str):
+                    sep_location = sep_pattern.split(location)
+                    if len(sep_location) != 2:
+                        raise ValueError('"locations" item incorrect! It may like this: \
+                                         \nlocation="116.404,39.915".')
+                    else:
+                        formatted_locations.append(','.join(sep_location[::-1]))
+
+                elif isinstance(location, list):
+                    if len(location) != 2:
+                        raise ValueError('"locations" item incorrect! It may like this: \
+                                         \nlocation=[116.404, 39.915]')
+                    else:
+                        formatted_locations.append(','.join(map(str, location[::-1])))
+
+                else:
+                    raise ValueError('"locations" item must be a str or list instance!')
+            kwargs['location'] = '|'.join(formatted_locations)
+        else:
+            raise ValueError('"locations" must be a list instance!')
     else:
         kwargs['address'] = address
 
