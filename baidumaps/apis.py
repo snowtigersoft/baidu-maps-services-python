@@ -98,8 +98,9 @@ def place_detail(client, uid=None, uids=None, **kwargs):
     if not any([uid, uids]):
         raise ValueError('please assign "uid" or "uids".')
     elif uids:
-        sep_uids = sep_pattern.split(kwargs['uids'])
-        kwargs['uids'] = ','.join(sep_uids)
+        if not isinstance(uids, list):
+            uids = sep_pattern.split(uids)
+        kwargs['uids'] = ','.join(uids)
     else:
         kwargs['uid'] = uid
 
